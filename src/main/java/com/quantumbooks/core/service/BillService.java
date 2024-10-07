@@ -4,21 +4,21 @@ import com.quantumbooks.core.dto.BillDto;
 import com.quantumbooks.core.dto.PaginatedResponseDto;
 import com.quantumbooks.core.entity.Bill;
 import com.quantumbooks.core.entity.Vendor;
+import com.quantumbooks.core.exception.ResourceNotFoundException;
 import com.quantumbooks.core.mapper.BillMapper;
 import com.quantumbooks.core.repository.BillRepository;
 import com.quantumbooks.core.repository.VendorRepository;
 import com.quantumbooks.core.specification.BillSpecification;
-import jakarta.persistence.EntityNotFoundException;
+import com.quantumbooks.core.util.PaginationSortingUtils;
+import com.quantumbooks.core.util.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,67 +27,63 @@ public class BillService {
     private final VendorRepository vendorRepository;
     private final BillMapper billMapper;
 
-    @Transactional(readOnly = true)
     public PaginatedResponseDto<BillDto> getBills(int page, int size, String search, String[] sort) {
-        Sort.Direction direction = Sort.Direction.ASC;
-        String property = "billId";
-        if (sort[0].equalsIgnoreCase("desc")) {
-            direction = Sort.Direction.DESC;
-            property = sort[1];
+        Pageable pageable = PaginationSortingUtils.createPageable(page, size, sort);
+        Specification<Bill> spec = Specification.where(null);
+
+        if (search != null && !search.isEmpty()) {
+            spec = spec.and(BillSpecification.withBillIdOrVendorName(search));
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, property));
-        Page<Bill> billPage = billRepository.findAll(BillSpecification.withBillIdOrVendorName(search), pageable);
+        Page<Bill> billPage = billRepository.findAll(spec, pageable);
 
-        List<BillDto> billDtos = billPage.getContent().stream()
+        List<BillDto> bills = billPage.getContent().stream()
                 .map(billMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
 
-        PaginatedResponseDto<BillDto> response = new PaginatedResponseDto<>();
-        response.setItems(billDtos);
-        response.setCurrentPage(billPage.getNumber());
-        response.setItemsPerPage(billPage.getSize());
-        response.setTotalItems(billPage.getTotalElements());
-        response.setTotalPages(billPage.getTotalPages());
-
-        return response;
+        return PaginationUtils.createPaginatedResponse(bills, billPage);
     }
 
     @Transactional
     public BillDto createBill(BillDto billDto) {
         Bill bill = billMapper.toEntity(billDto);
         Vendor vendor = vendorRepository.findById(billDto.getVendorId())
-                .orElseThrow(() -> new EntityNotFoundException("Vendor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor not found with id: " + billDto.getVendorId()));
         bill.setVendor(vendor);
         Bill savedBill = billRepository.save(bill);
         return billMapper.toDto(savedBill);
     }
 
-    @Transactional(readOnly = true)
     public BillDto getBillById(Long id) {
         Bill bill = billRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Bill not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Bill not found with id: " + id));
         return billMapper.toDto(bill);
     }
 
     @Transactional
     public BillDto updateBill(Long id, BillDto billDto) {
-        Bill bill = billRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Bill not found"));
-        billMapper.updateEntityFromDto(billDto, bill);
-        if (!bill.getVendor().getVendorId().equals(billDto.getVendorId())) {
+        Bill existingBill = billRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Bill not found with id: " + id));
+
+        Bill updatedBill = billMapper.toEntity(billDto);
+        updatedBill.setBillId(existingBill.getBillId());
+
+        if (!existingBill.getVendor().getVendorId().equals(billDto.getVendorId())) {
             Vendor vendor = vendorRepository.findById(billDto.getVendorId())
-                    .orElseThrow(() -> new EntityNotFoundException("Vendor not found"));
-            bill.setVendor(vendor);
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendor not found with id: " + billDto.getVendorId()));
+            updatedBill.setVendor(vendor);
+        } else {
+            updatedBill.setVendor(existingBill.getVendor());
         }
-        Bill updatedBill = billRepository.save(bill);
-        return billMapper.toDto(updatedBill);
+
+        Bill savedBill = billRepository.save(updatedBill);
+        return billMapper.toDto(savedBill);
     }
 
     @Transactional
     public void deleteBill(Long id) {
         if (!billRepository.existsById(id)) {
-            throw new EntityNotFoundException("Bill not found");
+            throw new ResourceNotFoundException("Bill not found with id: " + id);
         }
         billRepository.deleteById(id);
     }
