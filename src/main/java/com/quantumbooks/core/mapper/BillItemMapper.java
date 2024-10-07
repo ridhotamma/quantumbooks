@@ -2,7 +2,6 @@ package com.quantumbooks.core.mapper;
 
 import com.quantumbooks.core.dto.BillItemDto;
 import com.quantumbooks.core.entity.BillItem;
-import com.quantumbooks.core.entity.Bill;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -19,9 +18,9 @@ public interface BillItemMapper {
     })
     BillItem toEntity(BillItemDto billItemDto);
 
-    default BillItem updateEntityFromDto(BillItemDto billItemDto, BillItem billItem) {
+    default void updateEntityFromDto(BillItemDto billItemDto, BillItem billItem) {
         if (billItemDto == null) {
-            return billItem;
+            return;
         }
 
         billItem.setDescription(billItemDto.getDescription());
@@ -29,6 +28,5 @@ public interface BillItemMapper {
         billItem.setUnitPrice(billItemDto.getUnitPrice());
         billItem.setTotalPrice(billItemDto.getTotalPrice());
 
-        return billItem;
     }
 }

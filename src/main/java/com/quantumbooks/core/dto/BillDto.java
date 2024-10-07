@@ -30,5 +30,6 @@ public class BillDto {
     private BigDecimal paidAmount;
 
     @NotNull(message = "Status is required")
-    private BillStatus status;
+    @Pattern(regexp = "PENDING|PAID|OVERDUE|CANCELLED", message = "Status must be PENDING, PAID, OVERDUE, CANCELLED")
+    private String status;
 }

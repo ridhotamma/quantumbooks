@@ -2,7 +2,7 @@ package com.quantumbooks.core.mapper;
 
 import com.quantumbooks.core.dto.BillDto;
 import com.quantumbooks.core.entity.Bill;
-import com.quantumbooks.core.entity.Vendor;
+import com.quantumbooks.core.entity.Bill.BillStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -19,17 +19,16 @@ public interface BillMapper {
     })
     Bill toEntity(BillDto billDto);
 
-    default Bill updateEntityFromDto(BillDto billDto, Bill bill) {
+    default void updateEntityFromDto(BillDto billDto, Bill bill) {
         if (billDto == null) {
-            return bill;
+            return;
         }
 
         bill.setBillDate(billDto.getBillDate());
         bill.setDueDate(billDto.getDueDate());
         bill.setTotalAmount(billDto.getTotalAmount());
         bill.setPaidAmount(billDto.getPaidAmount());
-        bill.setStatus(billDto.getStatus());
+        bill.setStatus(BillStatus.valueOf(billDto.getStatus()));
 
-        return bill;
     }
 }
