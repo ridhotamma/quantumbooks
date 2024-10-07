@@ -36,4 +36,12 @@ public interface BudgetItemMapper {
         account.setAccountId(id);
         return account;
     }
+
+    default Long mapBudgetToId(Budget budget) {
+        return budget != null ? budget.getBudgetId() : null;
+    }
+
+    default Long mapAccountToId(Account account) {
+        return account != null ? account.getAccountId() : null;
+    }
 }

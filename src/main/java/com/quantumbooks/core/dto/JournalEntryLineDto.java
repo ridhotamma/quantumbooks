@@ -1,5 +1,6 @@
 package com.quantumbooks.core.dto;
 
+import com.quantumbooks.core.entity.JournalEntry;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
@@ -9,6 +10,8 @@ import java.math.BigDecimal;
 @Data
 public class JournalEntryLineDto {
     private Long lineId;
+
+    private JournalEntry journalEntry;
 
     @NotNull(message = "Journal Entry ID is required")
     private Long journalEntryId;

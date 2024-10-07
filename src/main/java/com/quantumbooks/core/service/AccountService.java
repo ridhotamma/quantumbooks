@@ -24,6 +24,7 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final AccountMapper accountMapper;
 
+    @Transactional(readOnly = true)
     public PaginatedResponseDto<AccountDto> getAccounts(int page, int size, String search, String[] sort) {
         Pageable pageable = PaginationSortingUtils.createPageable(page, size, sort);
         Specification<Account> spec = Specification.where(null);
@@ -53,6 +54,7 @@ public class AccountService {
         return accountMapper.toDto(savedAccount);
     }
 
+    @Transactional(readOnly = true)
     public AccountDto getAccountById(Long id) {
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + id));

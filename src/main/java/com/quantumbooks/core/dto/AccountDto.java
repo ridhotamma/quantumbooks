@@ -4,10 +4,13 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class AccountDto {
     private Long accountId;
+
+    private List<BudgetItemDto> budgetItems;
 
     @NotBlank(message = "Account name is required")
     @Size(min = 2, max = 100, message = "Account name must be between 2 and 100 characters")

@@ -1,6 +1,7 @@
 package com.quantumbooks.core.service;
 
 import com.quantumbooks.core.dto.BudgetDto;
+import com.quantumbooks.core.dto.BudgetDto.BudgetDetailDto;
 import com.quantumbooks.core.dto.PaginatedResponseDto;
 import com.quantumbooks.core.entity.Budget;
 import com.quantumbooks.core.exception.ResourceNotFoundException;
@@ -24,6 +25,7 @@ public class BudgetService {
     private final BudgetRepository budgetRepository;
     private final BudgetMapper budgetMapper;
 
+    @Transactional(readOnly = true)
     public PaginatedResponseDto<BudgetDto> getBudgets(int page, int size, String search, String[] sort) {
         Pageable pageable = PaginationSortingUtils.createPageable(page, size, sort);
         Specification<Budget> spec = Specification.where(null);
@@ -48,10 +50,11 @@ public class BudgetService {
         return budgetMapper.toDto(savedBudget);
     }
 
-    public BudgetDto getBudgetById(Long id) {
+    @Transactional(readOnly = true)
+    public BudgetDetailDto getBudgetById(Long id) {
         Budget budget = budgetRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget not found with id: " + id));
-        return budgetMapper.toDto(budget);
+        return budgetMapper.toBudgetDetailDto(budget);
     }
 
     @Transactional

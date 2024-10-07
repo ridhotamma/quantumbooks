@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "Accounts")
@@ -25,4 +26,7 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "ParentAccountID")
     private Account parentAccount;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BudgetItem> budgetItems;
 }

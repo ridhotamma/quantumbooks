@@ -1,6 +1,7 @@
 package com.quantumbooks.core.controller;
 
 import com.quantumbooks.core.dto.BudgetDto;
+import com.quantumbooks.core.dto.BudgetDto.BudgetDetailDto;
 import com.quantumbooks.core.dto.PaginatedResponseDto;
 import com.quantumbooks.core.service.BudgetService;
 import jakarta.validation.Valid;
@@ -32,8 +33,8 @@ public class BudgetController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BudgetDto> getBudgetById(@PathVariable Long id) {
-        BudgetDto budget = budgetService.getBudgetById(id);
+    public ResponseEntity<BudgetDetailDto> getBudgetById(@PathVariable Long id) {
+        BudgetDetailDto budget = budgetService.getBudgetById(id);
         return ResponseEntity.ok(budget);
     }
 

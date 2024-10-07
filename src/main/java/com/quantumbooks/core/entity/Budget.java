@@ -3,6 +3,7 @@ package com.quantumbooks.core.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Entity
@@ -23,4 +24,7 @@ public class Budget {
 
     @Column(nullable = false)
     private LocalDate endDate;
+
+    @OneToMany(mappedBy = "budget", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BudgetItem> budgetItems;
 }

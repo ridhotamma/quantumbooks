@@ -1,5 +1,6 @@
 package com.quantumbooks.core.dto;
 
+import com.quantumbooks.core.entity.Customer;
 import com.quantumbooks.core.entity.Invoice.InvoiceStatus;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.FutureOrPresent;
@@ -12,6 +13,8 @@ import java.time.LocalDate;
 @Data
 public class InvoiceDto {
     private Long invoiceID;
+
+    private Customer customer;
 
     @NotNull(message = "Customer ID is required")
     private Long customerID;
