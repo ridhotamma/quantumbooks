@@ -7,6 +7,7 @@ import com.quantumbooks.core.exception.DuplicateResourceException;
 import com.quantumbooks.core.exception.ResourceNotFoundException;
 import com.quantumbooks.core.repository.UserRepository;
 import com.quantumbooks.core.security.JwtTokenProvider;
+import com.quantumbooks.core.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,13 @@ public class AuthService {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userRepository.findById(userPrincipal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + userPrincipal.getId() + " is not found"));
+
+        user.setLastLoginDate(LocalDateTime.now());
+        userRepository.save(user);
 
         String jwt = tokenProvider.generateToken(authentication);
         String refreshToken = tokenProvider.generateRefreshToken(tokenProvider.getUserIdFromJWT(jwt));

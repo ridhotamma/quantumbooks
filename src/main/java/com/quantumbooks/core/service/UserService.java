@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -90,6 +91,7 @@ public class UserService {
         }
 
         User updatedUser = userMapper.toEntity(userDto);
+        updatedUser.setUpdatedAt(LocalDateTime.now());
         updatedUser.setId(existingUser.getId());
         updatedUser.setPassword(existingUser.getPassword());
 
