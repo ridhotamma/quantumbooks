@@ -21,6 +21,7 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String username;
 
+    @Column(name = "password_hash")
     private String password;
 
     @Column(unique = true)
@@ -34,6 +35,26 @@ public class User implements UserDetails {
 
     @Column(name = "LastLogin")
     private LocalDateTime lastLoginDate;
+
+    @Column(name = "is_superadmin")
+    private boolean isSuperAdmin = false;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
