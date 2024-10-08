@@ -5,9 +5,14 @@ import com.quantumbooks.core.dto.PaginatedResponseDto;
 import com.quantumbooks.core.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/employees")
@@ -47,5 +52,27 @@ public class EmployeeController {
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/export/excel")
+    public ResponseEntity<InputStreamResource> exportToExcel() throws IOException {
+        String filename = "employees.xlsx";
+        InputStreamResource file = new InputStreamResource(employeeService.exportToExcel());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(file);
+    }
+
+    @GetMapping("/export/csv")
+    public ResponseEntity<InputStreamResource> exportToCsv() throws IOException {
+        String filename = "employees.csv";
+        InputStreamResource file = new InputStreamResource(employeeService.exportToCsv());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(file);
     }
 }
